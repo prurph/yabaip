@@ -8,11 +8,16 @@ Just a mini-project to try to learn Golang; please be gentle. 😅
 
 ```yaml
 label: my_space
-windows:
-  - title: my_window
-    layout:
-      window_type: managed
-  - title: my_other_window
-    layout:
+windows: 
+  - 
+    command: 
+      - open
+      - /Users/prescott
+    window_type: managed
+  - 
+    command: 
+      - open
+      - /Applications/kitty.app
+    layout: 
       window_type: floating
 ```

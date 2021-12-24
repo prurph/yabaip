@@ -1,8 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/prurph/yabaip/internal/windowtype"
 	"gopkg.in/yaml.v2"
@@ -10,18 +12,23 @@ import (
 
 var space = `
 label: my_space
-windows:
-  - title: my_window
-    layout:
-      window_type: managed
-  - title: my_other_window
+windows: 
+  -
+    command:
+      - open
+      - /Users/prescott
+    window_type: managed
+  -
+    command:
+      - open
+      - /Applications/TextEdit.app
     layout:
       window_type: floating
 `
 
 type Window struct {
-	Title  string `yaml:"title"`
-	Layout struct {
+	Command []string `yaml:"command"`
+	Layout  struct {
 		WindowType windowtype.WindowType `yaml:"window_type"`
 	} `yaml:"layout"`
 }
@@ -35,8 +42,35 @@ func main() {
 	s := Space{}
 	err := yaml.Unmarshal([]byte(space), &s)
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
+		log.Fatal(err)
 		os.Exit(1)
 	}
-	fmt.Printf("--- t:\n%v\n\n", s)
+	var errbuf strings.Builder
+	cmd := exec.Command("yabai", "-m", "space", "--create")
+	cmd.Stderr = &errbuf
+	_, err = cmd.Output()
+	if err != nil {
+		log.Fatalf("command '%s' failed: %s", cmd, cmd.Stderr)
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	err = exec.Command("yabai", "-m", "space", "--focus", "last").Run()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	err = exec.Command("yabai", "-m", "space", "--label", s.Label).Run()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	for _, w := range s.Windows {
+		err = exec.Command(w.Command[0], w.Command[1:]...).Run()
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+	}
 }
