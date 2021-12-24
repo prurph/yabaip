@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	windowtype "github.com/prurph/yabaip/internal"
+	"github.com/prurph/yabaip/internal/windowtype"
 	"gopkg.in/yaml.v2"
 )
 
